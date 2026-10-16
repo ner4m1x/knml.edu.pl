@@ -1,0 +1,38 @@
+name: Test Hugo Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: przebudowastrony
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Hugo
+        run: |
+          wget -O /tmp/hugo.deb \
+            https://github.com/gohugoio/hugo/releases/download/v0.123.7/hugo_extended_0.123.7_linux-amd64.deb
+          sudo dpkg -i /tmp/hugo.deb
+
+      - name: Build Hugo site
+        run: |
+          hugo \
+            --source old-website \
+            --gc \
+            --minify \
+            --baseURL "https://example.com/"
+
+      - name: Check generated files
+        run: |
+          test -f old-website/public/index.html
+          find old-website/public -type f | head -20
